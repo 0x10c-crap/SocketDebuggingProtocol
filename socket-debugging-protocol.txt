@@ -1,6 +1,6 @@
 ===Socket Debugging Protocol===
 
-Protocol Version: 1
+Protocol Version: 2
 
 Goal: To provide a debugging protocol that allows for programatic interaction without regard to language or OS.
 
@@ -24,7 +24,7 @@ The generic packet structure is as follow
 The packet available are as follows:
 
 ---Emulator Information (0x00)
-[uint8]     Protocol Version (1)
+[uint8]     Protocol Version (2)
 [string]    Emulator Name
 [string]    Emulator Version
 
@@ -198,10 +198,27 @@ Client->Server
 Server->Client
 (Request Confirmation)
 
+---Interrupt Fired (0x10)
+Sent by the server when an interrupt fires, or by the client to change the emulator's behavior on interrupts.
+Client->Server
+[bool]      Break on interrupt (if true, the emulator will pause debugging when an interrupt fires)
+
+Server->Client
+[uint16]    Register IA
+[uint16]    Register A
+
 ---Request Confirmation (0x20)
 Sent by the server to confirm a request.
 Client->Server
 (non-appliciable)
+
+Server->Client
+(no contents)
+
+--Disconnect (0xFE)
+Sent to alert either side of the connection that the connection should be closed.  Assume that the sender has already closed the connection when this is recieved.
+Client->Server
+(no contents)
 
 Server->Client
 (no contents)
