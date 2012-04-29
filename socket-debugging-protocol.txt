@@ -1,0 +1,269 @@
+===Socket Debugging Protocol===
+
+Protocol Version: 1
+
+Goal: To provide a debugging protocol that allows for programatic interaction without regard to language or OS.
+
+The TCP-based debugger listens to port 22348 for connections by default. The byte ordering is big endian.
+
+The following data types are used:
+syyp
+[bool]:     An 8-bit unsigned integer, whose value is 1 for true and 0 for false.
+[uint8]:    An 8-bit unsigned integer.
+[uint16]:   A 16-bit unsigned integer.
+[uint32]:   A 32-bit unsigned integer.
+[string]:   A string of ASCII characters, length-prefixed by a uint16.
+[array]:    An array of uint16s, length-prefixed by a uint16.
+
+The generic packet structure is as follow
+
+[uint8]     Identifier
+[int32]     Length of contents
+[...]       Contents
+
+The packet available are as follows:
+
+---Emulator Information (0x00)
+[uint8]     Protocol Version (1)
+[string]    Emulator Name
+[string]    Emulator Version
+
+---Get Machine State (0x01)
+Retrieves the state of the DCPU.
+Client->Server:
+(no contents)
+
+Server->Client:
+[bool]      Is Running
+[uint16]    Register A
+[uint16]    Register B
+[uint16]    Register C
+[uint16]    Register X
+[uint16]    Register Y
+[uint16]    Register Z
+[uint16]    Register I
+[uint16]    Register J
+[uint16]    Register PC
+[uint16]    Register SP
+[uint16]    Register EX
+[uint16]    Register IA
+[uint16]    Clock Speed
+[uint32]    Cycles Executed Since Reset
+[uint8]     Queued Interrupts (0xFF if interrupt queueing is disabled)
+
+---Set Machine State (0x02)
+Sets the state of the DCPU.
+Client->Server
+[bool]      Is Running
+[uint16]    Register A
+[uint16]    Register B
+[uint16]    Register C
+[uint16]    Register X
+[uint16]    Register Y
+[uint16]    Register Z
+[uint16]    Register I
+[uint16]    Register J
+[uint16]    Register PC
+[uint16]    Register SP
+[uint16]    Register EX
+[uint16]    Register IA
+[uint16]    Clock Speed
+
+Server->Client
+(Request Confirmation)
+
+---Get Connected Devices (0x03)
+Gets a list of connected devices.
+Client->Server
+(no contents)
+
+Server->Client
+[uint16]    Number of connected devices
+
+This is followed by an array of data.  The structre of each entry is as follows:
+[uint32]    Hardware ID
+[uint16]    Hardware Version
+[uint32]    Hardware Manufacturer
+
+---Get Device State (0x04)
+Gets the state of an individual device.
+Client->Server
+[uint16]    Device Number
+
+Server->Client
+[bool]      Supported (if false, the remainder of the packet is unsent)
+(varies by device)
+
+---Set Device State (0x05)
+Sets the state of an individual device.
+Client->Server
+[uint16]    Device Number
+[...]       Varies by device
+
+Server->Client
+(Request Confirmation)
+
+---Get Memory Sector (0x06)
+Retrieves a number of words of memory.
+Client->Server
+[uint16]    Starting address
+[uint16]    Length
+
+Server->Client
+[array]     The requested memory data.
+
+---Set Memory Sector (0x07)
+Sets a number of words of memory.
+Client->Server
+[uint16]    Starting address
+[array]     The data to write.
+
+Server->Client
+(Request Confirmation)
+
+---Enable Memory Broadcast (0x08)
+Enables the debugger to broadcast changes in the requested range of memory whenever they occur.
+Client->Server
+[uint16]    Address
+[uint16]    Length
+
+Server->Client
+The server replies with a request confirmation packet (0x20).  Over time, it may send the following packet as well:
+[uint16]    Address
+[array]     The memory that has changed.  This should be the same size as the original sector length.
+
+---Disable Memory Brodcast (0x09)
+Allows the client to disable a memory broadcast for a specified range of memory.
+Client->Server
+[uint16]    Address
+[uint16]    Length
+
+Server->Client
+(Request Confirmation)
+
+---Set Emulation State (0x0A)
+Allows the client to chage the emulation state easily.
+Client->Server
+[byte]      State: 0 for paused, 1 for running, and 2 to cause a reset.
+
+Server->Client
+(Request Confirmation)
+
+---Breakpoint (0x0B)
+Allows the client to set breakpoints and the server to notify the client.
+Client->Server
+[uint16]    Address
+
+Server->Client
+The server does not reply to a client request, but it will send packets with an ID of 0x0A when a breakpoint is hit:
+[uint16]    Address
+The server will automatically pause when it hits a breakpoint.
+
+---Watchpoint (0x0C)
+Allows the client to set watchpoints and the server to notify the client.
+Client->Server
+[uint16]    Address
+[byte]      Type: 0 for read, 1 for write, 2 for both
+
+Server->Client
+The server does not reply to a client request, but it will send packets with an ID of 0x0B when a watchpoint is hit:
+[uint16]    Address
+The server will automatically pause when it hits a breakpoint.
+
+---Step Into (0x0D)
+Allows the client to request the emulator to step forward one instruction.
+Client->Server
+(no contents)
+
+Server->Client
+[uint16]    Register PC
+
+---Step Over (0x0E)
+Allows the client to request the emulator to "step over", or exucute one instruction, or a series of branches, or a complete JSR.
+Client->Server
+[uint16]    Maximum intructions to execute
+
+Server->Client
+[bool]      Success
+[uint16]    Register PC
+
+It is possible that a JSR may never return.  If the emulation exceeds the maximum instructions, it will reply with Success set to false.
+When the emulator completes a step over, it must resume its prior state with regard to emulation being paused or running.
+
+---Trigger Interrupt (0x0F)
+Triggers an interrupt on demand.
+Client->Server
+[uint16]    Interrupt message
+
+Server->Client
+(Request Confirmation)
+
+---Request Confirmation (0x20)
+Sent by the server to confirm a request.
+Client->Server
+(non-appliciable)
+
+Server->Client
+(no contents)
+
+---Error Processing Request (0xFF)
+Sent by the server in leu of a Request Confirmation if an error occured.
+Client->Server
+(non-appliciable)
+
+Server->Client
+[string]    Error message
+
+=== Supported Devices
+Device status is sent via 0x04 and modified via 0x05.  The supported devices and their status formats are as follows:
+
+---LEM1802 Screen
+Hardware ID: 0x7349f615
+Version: 0x1802
+Manufacturer: 0x1c6c8b36
+Packet Contents:
+Server->Client & Client->Server
+[uint16]    Screen Mapping
+[uint16]    Font Mapping
+[uint16]    Palette Mapping
+[uint16]    Border Color Mapping
+
+---Generic Clock
+Hardware ID: 0x12d0b402
+Version: 0x0001
+Manufacturer: ????
+Packet Contents:
+Server->Client & Client->Server
+[uint16]    Clock speed modifier
+[uint16]    Ticks elapsed
+[uint16]    Interrupt message (or zero)
+
+---Generic Keyboard
+Hardware ID: 0x30cf7406
+Version: 0x0001
+Manufacturer: ????
+Packet Contents:
+Server->Client
+[array]     Keyboard buffer (a uint16-length-prefixed array of uint16s)
+[uint16]    Interrupt message (or zero)
+
+Client->Server
+[array]     Keyboard buffer (a uint16-length-prefixed array of key numbers to add to the buffer)
+[uint16]    Interrupt message (or zero)
+[array]     Pressed keys (a uint16-length-prefixed array of uint16 key numbers)
+
+---Suspension Chamber 2000
+Hardware ID: 0x40e41d9d
+Version: 0x005e
+Manufacturer: 0x1c6c8b36
+Packet Contents:
+Server->Client
+[uint16]    Current status
+[uint16]    Unit to skip
+[uint16]    Skip unit
+
+Client->Server
+[uint16]    Current status
+[uint16]    Unit to skip
+[uint16]    Skip unit
+[bool]      Trigger device
