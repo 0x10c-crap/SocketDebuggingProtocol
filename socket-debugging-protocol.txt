@@ -47,7 +47,7 @@ Server->Client:
 [uint16]    Register SP
 [uint16]    Register EX
 [uint16]    Register IA
-[uint16]    Clock Speed
+[uint32]    Clock Speed (in Hz)
 [uint32]    Cycles Executed Since Reset
 [uint8]     Queued Interrupts (0xFF if interrupt queueing is disabled)
 
@@ -67,7 +67,7 @@ Client->Server
 [uint16]    Register SP
 [uint16]    Register EX
 [uint16]    Register IA
-[uint16]    Clock Speed
+[uint32]    Clock Speed (in Hz)
 
 Server->Client
 (Request Confirmation)

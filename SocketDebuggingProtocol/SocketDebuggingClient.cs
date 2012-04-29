@@ -74,7 +74,7 @@ namespace SocketDebuggingProtocol
             mstate.RegisterSP = ReadUInt16(TcpClient.GetStream());
             mstate.RegisterEX = ReadUInt16(TcpClient.GetStream());
             mstate.RegisterIA = ReadUInt16(TcpClient.GetStream());
-            mstate.ClockSpeed = ReadUInt16(TcpClient.GetStream());
+            mstate.ClockSpeed = ReadUInt32(TcpClient.GetStream());
             mstate.CyclesSinceReset = ReadUInt32(TcpClient.GetStream());
             mstate.QueuedInterrupts = ReadByte(TcpClient.GetStream());
 
@@ -100,7 +100,7 @@ namespace SocketDebuggingProtocol
                 .Concat(MakeUShort(State.RegisterSP))
                 .Concat(MakeUShort(State.RegisterEX))
                 .Concat(MakeUShort(State.RegisterIA))
-                .Concat(MakeUShort(State.ClockSpeed))
+                .Concat(MakeUInt(State.ClockSpeed))
                 .ToArray();
             SendPacket(packet, PacketID.SetMachineState);
 

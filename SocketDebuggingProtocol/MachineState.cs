@@ -23,7 +23,7 @@ namespace SocketDebuggingProtocol
         /// <summary>
         /// In hertz
         /// </summary>
-        public ushort ClockSpeed { get; set; }
+        public uint ClockSpeed { get; set; }
         public uint CyclesSinceReset { get; set; }
         public byte QueuedInterrupts { get; set; }
     }
