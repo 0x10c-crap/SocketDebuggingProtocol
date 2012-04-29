@@ -24,7 +24,11 @@ namespace SocketDebuggingProtocol
         public void Disconnect()
         {
             if (TcpClient.Connected)
+            {
+                byte[] packet = new byte[] { (byte)PacketID.Disconnect, 0x00, 0x00 };
+                TcpClient.GetStream().Write(packet, 0, packet.Length);
                 TcpClient.Close();
+            }
             else
                 throw new InvalidOperationException("The socket is not connected.");
         }

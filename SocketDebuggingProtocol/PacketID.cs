@@ -23,7 +23,9 @@ namespace SocketDebuggingProtocol
         StepInto =                  0x0D,
         StepOver =                  0x0E,
         TriggerInterrupt =          0x0F,
+        InterruptFired =            0x10,
         RequestConfirmation =       0x20,
+        Disconnect =                0xFE,
         ErrorProcessingRequest =    0xFF,
     }
 }

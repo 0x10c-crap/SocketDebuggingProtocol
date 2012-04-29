@@ -209,6 +209,18 @@ Server->Client
 [bool]      Queued (if true, the interrupt did not execute the interrupt, but queued it)
 [bool]      Dequeued (if true, this interrupt was dequeued from the interrupt queue)
 
+---Device Status Changed (0x11)
+Allows the client to request notification when the status of a device changes.
+Client->Server
+[uint16]    Change notification status for this device number
+[bool]      Enable notification
+[bool]      Break on change
+
+Server->Client
+The server responds with an 0x20 packet, but may occasionally send these packets.  See the "Supported Devices" section for more information on the contents of the server->client packet.
+[uint16]    Device number that changed
+(varies by device)
+
 ---Request Confirmation (0x20)
 Sent by the server to confirm a request.
 Client->Server
