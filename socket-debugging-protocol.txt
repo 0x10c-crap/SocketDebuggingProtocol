@@ -206,6 +206,8 @@ Client->Server
 Server->Client
 [uint16]    Register IA
 [uint16]    Register A
+[bool]      Queued (if true, the interrupt did not execute the interrupt, but queued it)
+[bool]      Dequeued (if true, this interrupt was dequeued from the interrupt queue)
 
 ---Request Confirmation (0x20)
 Sent by the server to confirm a request.
