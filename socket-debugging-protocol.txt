@@ -201,7 +201,7 @@ Server->Client
 ---Interrupt Fired (0x10)
 Sent by the server when an interrupt fires, or by the client to change the emulator's behavior on interrupts.
 Client->Server
-[bool]      Break on interrupt (if true, the emulator will pause debugging when an interrupt fires)
+[bool]      Break on interrupt (if true, the emulator will pause debugging when an interrupt fires - this will not affect queued interrupts until they dequeue)
 
 Server->Client
 [uint16]    Register IA
