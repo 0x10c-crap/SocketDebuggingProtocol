@@ -1,6 +1,5 @@
 ===Socket Debugging Protocol===
-
-Protocol Version: 2
+Protocol Version: 3
 
 Goal: To provide a debugging protocol that allows for programatic interaction without regard to language or OS.
 
@@ -24,7 +23,14 @@ The generic packet structure is as follow
 The packet available are as follows:
 
 ---Emulator Information (0x00)
-[uint8]     Protocol Version (2)
+Establishes communication and generates an emulator.  See the Implementation Details section for more information.
+Client->Server
+[uint8]     Protocol Version (3)
+[uint16]    Emulator ID (or 0 for a new emulator)
+
+Server->Client
+[uint8]     Protocol Version (3)
+[uint16]    Emulator ID (or 0 if only one emulator is supported)
 [string]    Emulator Name
 [string]    Emulator Version
 
@@ -298,3 +304,21 @@ Client->Server
 [uint16]    Unit to skip
 [uint16]    Skip unit
 [bool]      Trigger device
+
+===Implementation Details
+---Server
+A server should be capable of having many emulators at once.  If it is not, it should always respond to 0x00
+with a zero for emulator ID.  Otherwise, it should generate a unique emulator if the client sends an emulator
+ID of 0, and assign it an ID.  If the client sends an emulator ID, it should be able to connect to the specified
+emulator in read-only mode - any packet that instructs the server to set a value will return an 0xFF (error)
+packet whose message is "Permission Denied".  If the client sends an emulator ID that does not exist, the server
+should send an 0xFF packet whose message is "Emulator Not Found", then should send an 0xFE and terminate the
+session.  If any non-0x00 packets are recieved before an 0x00 packet, the server should send an 0xFF whose
+message is "Protocol Error", followed by an 0xFE, and terminate the session.
+If the server recieves an incorrect protocol version in the 0x00 packet, it should reply with 0xFF whose message
+is "Version Conflict", followed by an 0xFE and termination of the session.
+
+---Client
+The proper sequence to start communication is to connect to the server, and send an 0x00 with a value of 0 for a
+new emulator, or an existing emulator ID to connect to an existing session in spectator mode.  After this, you
+may poll the server for any information you wish and continue the connection as normal.
