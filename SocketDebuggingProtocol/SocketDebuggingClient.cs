@@ -79,7 +79,7 @@ namespace SocketDebuggingProtocol
             mstate.RegisterEX = ReadUInt16(TcpClient.GetStream());
             mstate.RegisterIA = ReadUInt16(TcpClient.GetStream());
             mstate.ClockSpeed = ReadUInt32(TcpClient.GetStream());
-            mstate.CyclesSinceReset = ReadUInt32(TcpClient.GetStream());
+            mstate.CyclesSinceReset = ReadUInt64(TcpClient.GetStream());
             mstate.QueuedInterrupts = ReadByte(TcpClient.GetStream());
 
             LastKnownMachineState = mstate;

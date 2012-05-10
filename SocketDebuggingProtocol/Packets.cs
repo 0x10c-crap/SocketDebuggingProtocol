@@ -39,6 +39,12 @@ namespace SocketDebuggingProtocol
             stream.Write(b, 0, b.Length);
         }
 
+        public void WriteUInt64(Stream stream, ulong integer)
+        {
+            byte[] b = BitConverter.GetBytes((ulong)IPAddress.HostToNetworkOrder((long)integer));
+            stream.Write(b, 0, b.Length);
+        }
+
         public void WriteString(Stream stream, string value)
         {
             WriteUInt16(stream, (ushort)value.Length);
@@ -64,6 +70,13 @@ namespace SocketDebuggingProtocol
         }
 
         public uint ReadUInt32(Stream stream)
+        {
+            byte[] buffer = new byte[sizeof(uint)];
+            stream.Read(buffer, 0, sizeof(uint));
+            return (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(buffer, 0));
+        }
+
+        public uint ReadUInt64(Stream stream)
         {
             byte[] buffer = new byte[sizeof(uint)];
             stream.Read(buffer, 0, sizeof(uint));

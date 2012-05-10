@@ -1,5 +1,5 @@
 ===Socket Debugging Protocol===
-Protocol Version: 3
+Protocol Version: 4
 
 Goal: To provide a debugging protocol that allows for programatic interaction without regard to language or OS.
 
@@ -11,6 +11,7 @@ syyp
 [uint8]:    An 8-bit unsigned integer.
 [uint16]:   A 16-bit unsigned integer.
 [uint32]:   A 32-bit unsigned integer.
+[uint64]:   A 64-bit unsigned integer.
 [string]:   A string of ASCII characters, length-prefixed by a uint16.
 [array]:    An array of uint16s, length-prefixed by a uint16.
 
@@ -54,8 +55,8 @@ Server->Client:
 [uint16]    Register EX
 [uint16]    Register IA
 [uint32]    Clock Speed (in Hz)
-[uint32]    Cycles Executed Since Reset
-[uint8]     Queued Interrupts (0xFF if interrupt queueing is disabled)
+[uint64]    Cycles Executed Since Reset
+[uint16]    Queued Interrupts (0xFFFF if interrupt queueing is disabled)
 
 ---Set Machine State (0x02)
 Sets the state of the DCPU.
