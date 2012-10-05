@@ -306,6 +306,19 @@ Client->Server
 [uint16]    Skip unit
 [bool]      Trigger device
 
+---SPED-3 Display
+Hardware ID: 0x42babf3c
+Version: 0x0003
+Manufacturer: 0x1eb37e91
+Packet Contents:
+Server->Client & Client->Server
+[uint16]   Current state
+[uint16]   Last error
+[uint16]   Memory map
+[uint16]   Total verticies
+[uint16]   Target rotation
+[uint16]   Current rotation
+
 ===Implementation Details
 ---Server
 A server should be capable of having many emulators at once.  If it is not, it should always respond to 0x00
