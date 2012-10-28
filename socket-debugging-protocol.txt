@@ -7,7 +7,7 @@ The TCP-based debugger listens to port 22348 for connections by default. The byt
 
 The following data types are used:
 syyp
-[bool]:     An 8-bit unsigned integer, whose value is 1 for true and 0 for false.
+[bool]:     An 8-bit unsigned integer, whose value is 0 for false and non-zero for true.
 [uint8]:    An 8-bit unsigned integer.
 [uint16]:   A 16-bit unsigned integer.
 [uint32]:   A 32-bit unsigned integer.
