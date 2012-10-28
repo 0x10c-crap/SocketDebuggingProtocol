@@ -18,7 +18,7 @@ syyp
 The generic packet structure is as follow
 
 [uint8]     Identifier
-[int32]     Length of contents
+[uint32]    Length of contents
 [...]       Contents
 
 The packet available are as follows:
